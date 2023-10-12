@@ -43,16 +43,10 @@ void loop() {
 void findAngleBetweenPoints(byte &x, byte &y, int16_t &angle){
 // find dot product
 //i hate maths
-//  uint32_t dotProduct = (x * globalAverageX) + (y * globalAverageY);
   double magnitudeOld = sqrt(sq(x) + sq(y));
   double magnitudeNew = sqrt(sq(globalAverageX) + sq(globalAverageY));
-//  double a = dotProduct / (magnitudeOld * magnitudeNew);
   double a = /*tan*/tan((x * globalAverageX + y * globalAverageY) / (magnitudeOld  - magnitudeNew));
   angle = (a * 180) / 3.141;//this should be cos(a) but what's there works better
-//  if (angle > 0){ 
-//    angle += 180;
-//  }
-//  Serial.println(angle);
 }
 void firstRule(boidSingle *array){
   for (byte i = 0; i < amountOfBoids; i++){
@@ -65,16 +59,12 @@ void firstRule(boidSingle *array){
 void secondRule(byte &x, byte &y, int16_t &angle, boidSingle *array){
   for (byte i = 0; i < amountOfBoids; i++){
     if ((y + 1 == array[i].y) | (x + 1 == array[i].x)){
-      y -= 1;
-      x -= 1;
       array[i].velocity = 1;
-      angle = -angle; //array[i].angle;
+      angle = -angle;
     }
     else if ((y - 1 == array[i].y) | (x - 1 == array[i].x)){
-      y += 1;
-      x += 1;
       array[i].velocity = 1;
-      angle = -angle; //array[i].angle;
+      angle = -angle;
     }
   }
 }
@@ -108,7 +98,7 @@ void showBoids(boidSingle *array){
 void boidReset(byte &x, byte &y, byte &velocity, int16_t &angle){
   y = random(0, SCREENHEIGHT);
   x = random(0, SCREENWIDTH);
-  velocity = random(1, 3);
+  velocity = random(1, 6);
   angle = random(0, 359);
 }
 void boidSetup(boidSingle *array){
