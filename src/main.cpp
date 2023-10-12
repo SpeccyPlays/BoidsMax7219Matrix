@@ -13,7 +13,7 @@ struct boidSingle{
   byte velocity;
   int16_t angle;
 };
-boidSingle boidArray[25];
+boidSingle boidArray[30];
 uint32_t globalAverageX = 0;
 uint32_t globalAverageY = 0;
 uint8_t amountOfBoids = sizeof(boidArray) / sizeof(boidArray[0]);
@@ -64,54 +64,51 @@ void firstRule(boidSingle *array){
 }
 void secondRule(byte &x, byte &y, int16_t &angle, boidSingle *array){
   for (byte i = 0; i < amountOfBoids; i++){
-    if ((y + 3 == array[i].y) | (x + 3 == array[i].x)){
+    if ((y + 1 == array[i].y) | (x + 1 == array[i].x)){
       y -= 1;
       x -= 1;
-      array[i].velocity = 10;
-//      angle = array[i].angle;
+      array[i].velocity = 1;
+      angle = -angle; //array[i].angle;
     }
-    if ((y - 3 == array[i].y) | (x - 3 == array[i].x)){
+    else if ((y - 1 == array[i].y) | (x - 1 == array[i].x)){
       y += 1;
       x += 1;
-      array[i].velocity = 10;
-//      angle = array[i].angle;
+      array[i].velocity = 1;
+      angle = -angle; //array[i].angle;
     }
   }
 }
 void showBoids(boidSingle *array){
-  for (byte i = 0; i < amountOfBoids; i++){
-    display.drawPixel(array[i].x, array[i].y);
-    array[i].oldX = array[i].x;
-    array[i].oldY = array[i].y;
-    array[i].velocity ++;
-    findAngleBetweenPoints(array[i].x, array[i].y, array[i].angle);
-    int16_t rotation = 360 - array[i].angle;
-    int16_t angleToRad = (rotation * 3.141) / 180;
-    array[i].y += array[i].velocity * sin(angleToRad);
-    array[i].x += array[i].velocity * cos(angleToRad);
-    if (array[i].x <= 0){
-      array[i].x =+ SCREENWIDTH;
-      array[i].velocity = 10;
-    }
-    if (array[i].x > SCREENWIDTH){
-      array[i].x = 0;//=- SCREENWIDTH;
-      array[i].velocity = 10;
-    }
-    if (array[i].y <= 0){
-      array[i].y =+ SCREENHEIGHT -2;
-      array[i].velocity = 10;
-    }
-    if (array[i].y >= SCREENHEIGHT){
-      array[i].y =- SCREENHEIGHT - 2;
-      array[i].velocity = 10;
-    }
-    secondRule(array[i].x, array[i].y, array[i].angle, boidArray);
-  }
+	for (byte i = 0; i < amountOfBoids; i++){
+		display.drawPixel(array[i].x, array[i].y);
+		array[i].velocity ++;
+		findAngleBetweenPoints(array[i].x, array[i].y, array[i].angle);
+		array[i].y += array[i].velocity * sin(array[i].angle);
+		array[i].x += array[i].velocity * cos(array[i].angle);	
+		if (array[i].x <= 0){
+			array[i].x = SCREENWIDTH -1;
+			array[i].velocity = 1;
+		}
+		if (array[i].x >= SCREENWIDTH){
+			array[i].x = 1;
+			array[i].velocity = 1;
+		}
+		if (array[i].y <= 0){
+			array[i].y = SCREENHEIGHT -1;
+			array[i].velocity = 1; 
+		}
+		if (array[i].y > SCREENHEIGHT){
+			array[i].y = 1;
+			array[i].velocity = 1;
+		}
+		secondRule(array[i].x, array[i].y, array[i].angle, boidArray);
+//		delay(500);
+	}
 }
 void boidReset(byte &x, byte &y, byte &velocity, int16_t &angle){
-  y = random(0, SCREENHEIGHT - 1);
-  x = random(0, SCREENWIDTH - 1);
-  velocity = random(10, 20);
+  y = random(0, SCREENHEIGHT);
+  x = random(0, SCREENWIDTH);
+  velocity = random(1, 3);
   angle = random(0, 359);
 }
 void boidSetup(boidSingle *array){
