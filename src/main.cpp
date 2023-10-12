@@ -13,7 +13,7 @@ struct boidSingle{
   byte velocity;
   int16_t angle;
 };
-boidSingle boidArray[30];
+boidSingle boidArray[50];
 uint32_t globalAverageX = 0;
 uint32_t globalAverageY = 0;
 uint8_t amountOfBoids = sizeof(boidArray) / sizeof(boidArray[0]);
@@ -36,7 +36,7 @@ void loop() {
   display.wipeScreenBuffer();
   showBoids(boidArray);
   display.sendScreenBuffer();
-  delay(50);
+  delay(20);
   firstRule(boidArray);
 }
 
