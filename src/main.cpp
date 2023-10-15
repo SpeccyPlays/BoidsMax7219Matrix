@@ -11,20 +11,25 @@ byte SCREENWIDTH = 0;
 byte SCREENHEIGHT= 0;
 
 struct boidSingle{
-  byte x;
-  byte y;
+  int8_t x;
+  int8_t y;
   byte velocity;
   float angle;
 };
-boidSingle boidArray[25];
+boidSingle boidArray[20];
 uint32_t globalAverageX = 0;
 uint32_t globalAverageY = 0;
 uint8_t amountOfBoids = 0;
+//these two change the boid behaviour
+byte maxSpeed = 5;
+float avoidenceAngle = 0.8;
+//just for ease of changing the time between screen refresh
+byte loopDelay = 100;
 void boidSetup(boidSingle *array);
 void showBoids(boidSingle *array);
 void firstRule(boidSingle *array);
-void secondRule(byte &x, byte &y, float &angle, byte &velocity, boidSingle *array);
-void findAngleBetweenPoints(byte &x, byte &y, float &angle, uint8_t targetX, uint8_t targetY);
+void secondRule(int8_t &x, int8_t &y, float &angle, byte &velocity, boidSingle *array);
+void findAngleBetweenPoints(int8_t &x, int8_t &y, float &angle, uint8_t targetX, uint8_t targetY);
 
 void setup() {
   // put your setup code here, to run once:
@@ -40,9 +45,9 @@ void loop() {
   display.wipeScreenBuffer();
   showBoids(boidArray);
   display.sendScreenBuffer();
-  delay(100);
+  delay(loopDelay);
 }
-void findAngleBetweenPoints(byte &x, byte &y, float &angle, uint8_t targetX, uint8_t targetY){
+void findAngleBetweenPoints(int8_t &x, int8_t &y, float &angle, uint8_t targetX, uint8_t targetY){
   /*
   Find the angle between the boid we're at and the center mass
   */
@@ -59,14 +64,13 @@ void firstRule(boidSingle *array){
   globalAverageX = (globalAverageX / (amountOfBoids - 1));
   globalAverageY = (globalAverageY / (amountOfBoids - 1));
 }
-void secondRule(byte &x, byte &y, float &angle, byte &velocity, boidSingle *array){
+void secondRule(int8_t &x, int8_t &y, float &angle, byte &velocity, boidSingle *array){
   /*
   Second rule of boid is to avoid other boids
   */
-  byte avoidence = 1;//1 is best, other values will get them all stuck
-  byte avoidenceAngle = 0.6;
+  byte avoidence = 1;
   byte neighbourCount = 0;
-  uint16_t avgNeighbourVeloctity = 0;
+  byte avgNeighbourVeloctity = 0;
   for (byte i = 0; i < amountOfBoids; i++){
     if ((y + avoidence == array[i].y) && (x + avoidence == array[i].x)){
       neighbourCount ++;
@@ -91,8 +95,7 @@ void secondRule(byte &x, byte &y, float &angle, byte &velocity, boidSingle *arra
   }
   if (neighbourCount > 0){
     velocity = avgNeighbourVeloctity / neighbourCount;
-  }
-  
+  } 
 }
 void showBoids(boidSingle *array){
   /*
@@ -100,7 +103,9 @@ void showBoids(boidSingle *array){
   Check if we're inside or outside the 'screen' boundaries and adjust where needed
   */
 	for (byte i = 0; i < amountOfBoids; i++){
-    array[i].velocity ++;
+    if (array[i].velocity < maxSpeed){
+      array[i].velocity ++;
+    }
     if (array[i].x <= 0){
 			array[i].x = SCREENWIDTH -2;
 			array[i].velocity = 1;
@@ -118,21 +123,26 @@ void showBoids(boidSingle *array){
 			array[i].velocity = 1;
 		}
     firstRule(boidArray);
-    secondRule(array[i].x, array[i].y, array[i].angle, array[i].velocity, boidArray);
+    /*
+    Find the angle between boid current position and centre mass first
+    The second rule will adjust the angle to avoid others
+    */
     findAngleBetweenPoints(array[i].x, array[i].y, array[i].angle, globalAverageX, globalAverageY);
+    secondRule(array[i].x, array[i].y, array[i].angle, array[i].velocity, boidArray);
+
     //moving toward the center mass
     array[i].y += array[i].velocity * sin(array[i].angle);
 		array[i].x += array[i].velocity * cos(array[i].angle);
     display.drawPixel(array[i].x, array[i].y);
 	}
 }
-void boidReset(byte &x, byte &y, byte &velocity, float &angle){
+void boidReset(int8_t &x, int8_t &y, byte &velocity, float &angle){
   /*
   Generate random values
   */
   y = random(0, SCREENHEIGHT);
   x = random(0, SCREENWIDTH);
-  velocity = random(1, 4);
+  velocity = random(1, maxSpeed);
   angle = random(0.0, 4.7);
 }
 void boidSetup(boidSingle *array){
